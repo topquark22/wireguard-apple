@@ -61,7 +61,7 @@ extension TunnelConfiguration {
                     let keyWithCase = trimmedLine[..<equalsIndex].trimmingCharacters(in: .whitespacesAndNewlines)
                     let key = keyWithCase.lowercased()
                     let value = trimmedLine[trimmedLine.index(equalsIndex, offsetBy: 1)...].trimmingCharacters(in: .whitespacesAndNewlines)
-                    let keysWithMultipleEntriesAllowed: Set<String> = ["address", "allowedips", "dns"]
+                    let keysWithMultipleEntriesAllowed: Set<String> = ["address", "allowedips", "dns", "killswitchexceptions"]
                     if let presentValue = attributes[key] {
                         if keysWithMultipleEntriesAllowed.contains(key) {
                             attributes[key] = presentValue + "," + value
@@ -71,7 +71,7 @@ extension TunnelConfiguration {
                     } else {
                         attributes[key] = value
                     }
-                    let interfaceSectionKeys: Set<String> = ["privatekey", "listenport", "address", "dns", "mtu"]
+                    let interfaceSectionKeys: Set<String> = ["privatekey", "listenport", "address", "dns", "mtu", "killswitchexceptions"]
                     let peerSectionKeys: Set<String> = ["publickey", "presharedkey", "allowedips", "endpoint", "persistentkeepalive"]
                     if parserState == .inInterfaceSection {
                         guard interfaceSectionKeys.contains(key) else {
@@ -142,6 +142,10 @@ extension TunnelConfiguration {
         if let mtu = interface.mtu {
             output.append("MTU = \(mtu)\n")
         }
+        if !interface.killSwitchExceptions.isEmpty {
+            let exceptions = interface.killSwitchExceptions.map { $0.stringRepresentation }.joined(separator: ", ")
+            output.append("KillSwitchExceptions = \(exceptions)\n")
+        }
 
         for peer in peers {
             output.append("\n[Peer]\n")
@@ -187,6 +191,12 @@ extension TunnelConfiguration {
                 addresses.append(address)
             }
             interface.addresses = addresses
+        }
+        if let exceptionsString = attributes["killswitchexceptions"] {
+            guard let exceptions = IPAddressRange.parseKillSwitchExceptions(exceptionsString) else {
+                throw ParseError.interfaceHasInvalidAddress(exceptionsString)
+            }
+            interface.killSwitchExceptions = exceptions
         }
         if let dnsString = attributes["dns"] {
             var dnsServers = [DNSServer]()

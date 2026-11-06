@@ -14,6 +14,7 @@ class TunnelViewModel {
         case listenPort
         case mtu
         case dns
+        case killSwitchExceptions
         case status
         case toggleStatus
 
@@ -27,6 +28,7 @@ class TunnelViewModel {
             case .listenPort: return tr("tunnelInterfaceListenPort")
             case .mtu: return tr("tunnelInterfaceMTU")
             case .dns: return tr("tunnelInterfaceDNS")
+            case .killSwitchExceptions: return tr("tunnelInterfaceKillSwitchExceptions")
             case .status: return tr("tunnelInterfaceStatus")
             case .toggleStatus: return ""
             }
@@ -144,6 +146,9 @@ class TunnelViewModel {
                 dns.append(contentsOf: config.dnsSearch)
                 scratchpad[.dns] = dns.joined(separator: ", ")
             }
+            if !config.killSwitchExceptions.isEmpty {
+                scratchpad[.killSwitchExceptions] = config.killSwitchExceptions.map { $0.stringRepresentation }.joined(separator: ", ")
+            }
             return scratchpad
         }
 
@@ -177,6 +182,14 @@ class TunnelViewModel {
                     }
                 }
                 config.addresses = addresses
+            }
+            if let exceptionsString = scratchpad[.killSwitchExceptions] {
+                if let exceptions = IPAddressRange.parseKillSwitchExceptions(exceptionsString) {
+                    config.killSwitchExceptions = exceptions
+                } else {
+                    fieldsWithError.insert(.killSwitchExceptions)
+                    errorMessages.append(tr("alertInvalidInterfaceMessageKillSwitchExceptionsInvalid"))
+                }
             }
             if let listenPortString = scratchpad[.listenPort] {
                 if let listenPort = UInt16(listenPortString) {

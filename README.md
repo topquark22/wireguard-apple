@@ -2,6 +2,29 @@
 
 This project contains an application for iOS and for macOS, as well as many components shared between the two of them. You may toggle between the two platforms by selecting the target from within Xcode.
 
+## Excluding networks from the tunnel
+
+The optional `KillSwitchExceptions` field in the `[Interface]` section is a
+comma-separated list of IP addresses or CIDR networks. For example:
+
+```
+KillSwitchExceptions = 10.1.1.0/24, 192.168.2.1, fd00::/8
+```
+
+The iOS editor also exposes this field. The app supplies these networks as
+excluded routes to Network Extension, which routes matching traffic through
+the current primary physical interface instead of the tunnel. This differs
+from Windows firewall exceptions: it does not install a firewall or guarantee
+that other traffic is blocked. The setting applies even without a default
+route, and excluded traffic is not encrypted by WireGuard. DNS queries may
+also bypass the tunnel if their destination is excluded.
+
+The tunnel refuses to start with exceptions if its VPN configuration enables
+`includeAllNetworks` or `enforceRoutes`. Other system policies and routing
+rules may also affect the result. Test the routing and security behavior on
+each device and network; this development implementation has not been
+verified on macOS or iOS devices.
+
 ## Building
 
 - Clone this repo:

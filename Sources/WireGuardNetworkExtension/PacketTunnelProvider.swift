@@ -28,6 +28,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
+        if !tunnelConfiguration.interface.killSwitchExceptions.isEmpty &&
+            (tunnelProviderProtocol.includeAllNetworks || tunnelProviderProtocol.enforceRoutes) {
+            wg_log(.error, staticMessage: "Kill-switch exceptions cannot be used with includeAllNetworks or enforceRoutes")
+            errorNotifier.notify(PacketTunnelProviderError.incompatibleKillSwitchExceptions)
+            completionHandler(PacketTunnelProviderError.incompatibleKillSwitchExceptions)
+            return
+        }
+
         // Start the tunnel
         adapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
             guard let adapterError = adapterError else {

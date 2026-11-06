@@ -115,13 +115,16 @@ class PacketTunnelSettingsGenerator {
 
         let (ipv4Addresses, ipv6Addresses) = addresses()
         let (ipv4IncludedRoutes, ipv6IncludedRoutes) = includedRoutes()
+        let (ipv4ExcludedRoutes, ipv6ExcludedRoutes) = excludedRoutes()
 
         let ipv4Settings = NEIPv4Settings(addresses: ipv4Addresses.map { $0.destinationAddress }, subnetMasks: ipv4Addresses.map { $0.destinationSubnetMask })
         ipv4Settings.includedRoutes = ipv4IncludedRoutes
+        ipv4Settings.excludedRoutes = ipv4ExcludedRoutes
         networkSettings.ipv4Settings = ipv4Settings
 
         let ipv6Settings = NEIPv6Settings(addresses: ipv6Addresses.map { $0.destinationAddress }, networkPrefixLengths: ipv6Addresses.map { $0.destinationNetworkPrefixLength })
         ipv6Settings.includedRoutes = ipv6IncludedRoutes
+        ipv6Settings.excludedRoutes = ipv6ExcludedRoutes
         networkSettings.ipv6Settings = ipv6Settings
 
         return networkSettings
@@ -140,6 +143,19 @@ class PacketTunnelSettingsGenerator {
                  * intentionally small. TODO: talk about this with upstream iOS devs.
                  */
                 ipv6Routes.append(NEIPv6Route(destinationAddress: "\(addressRange.address)", networkPrefixLength: NSNumber(value: min(120, addressRange.networkPrefixLength))))
+            }
+        }
+        return (ipv4Routes, ipv6Routes)
+    }
+
+    private func excludedRoutes() -> ([NEIPv4Route], [NEIPv6Route]) {
+        var ipv4Routes = [NEIPv4Route]()
+        var ipv6Routes = [NEIPv6Route]()
+        for range in tunnelConfiguration.interface.killSwitchExceptions {
+            if range.address is IPv4Address {
+                ipv4Routes.append(NEIPv4Route(destinationAddress: "\(range.maskedAddress())", subnetMask: "\(range.subnetMask())"))
+            } else if range.address is IPv6Address {
+                ipv6Routes.append(NEIPv6Route(destinationAddress: "\(range.maskedAddress())", networkPrefixLength: NSNumber(value: range.networkPrefixLength)))
             }
         }
         return (ipv4Routes, ipv6Routes)

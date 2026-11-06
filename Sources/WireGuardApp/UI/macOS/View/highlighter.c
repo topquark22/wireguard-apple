@@ -344,6 +344,7 @@ enum field {
 	Address,
 	DNS,
 	MTU,
+	KillSwitchExceptions,
 #ifndef MOBILE_WGQUICK_SUBSET
 	FwMark,
 	Table,
@@ -378,6 +379,7 @@ static enum field get_field(string_span_t s)
 	check_enum(Address);
 	check_enum(DNS);
 	check_enum(MTU);
+	check_enum(KillSwitchExceptions);
 	check_enum(PublicKey);
 	check_enum(PresharedKey);
 	check_enum(AllowedIPs);
@@ -454,6 +456,7 @@ static void highlight_multivalue_value(struct highlight_span_array *ret, const s
 			append_highlight_span(ret, parent.s, s, HighlightError);
 		break;
 	case Address:
+	case KillSwitchExceptions:
 	case AllowedIPs: {
 		size_t slash;
 
@@ -563,6 +566,7 @@ static void highlight_value(struct highlight_span_array *ret, const string_span_
 	}
 	case Address:
 	case DNS:
+	case KillSwitchExceptions:
 	case AllowedIPs:
 		highlight_multivalue(ret, parent, s, section);
 		break;

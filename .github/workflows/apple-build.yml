@@ -1,0 +1,54 @@
+name: Apple build and tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apple:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.19.13'
+          cache: false
+      - name: Test configuration and route generation
+        run: |
+          clang -c Sources/WireGuardKitC/key.c -o "$RUNNER_TEMP/key.o"
+          clang -c Sources/WireGuardKitC/x25519.c -o "$RUNNER_TEMP/x25519.o"
+          swiftc -D SWIFT_PACKAGE -I Sources/WireGuardKitC \
+            Sources/WireGuardKit/Array+ConcurrentMap.swift \
+            Sources/WireGuardKit/DNSResolver.swift \
+            Sources/WireGuardKit/DNSServer.swift \
+            Sources/WireGuardKit/Endpoint.swift \
+            Sources/WireGuardKit/IPAddress+AddrInfo.swift \
+            Sources/WireGuardKit/IPAddressRange.swift \
+            Sources/WireGuardKit/InterfaceConfiguration.swift \
+            Sources/WireGuardKit/PacketTunnelSettingsGenerator.swift \
+            Sources/WireGuardKit/PeerConfiguration.swift \
+            Sources/WireGuardKit/PrivateKey.swift \
+            Sources/WireGuardKit/TunnelConfiguration.swift \
+            Sources/Shared/Model/String+ArrayConversion.swift \
+            Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift \
+            Sources/WireGuardApp/Tunnel/TunnelConfiguration+UapiConfig.swift \
+            Sources/WireGuardApp/LocalizationHelper.swift \
+            Sources/WireGuardApp/UI/TunnelViewModel.swift \
+            Tests/KillSwitchExceptions.swift "$RUNNER_TEMP/key.o" "$RUNNER_TEMP/x25519.o" \
+            -o "$RUNNER_TEMP/exception-tests"
+          "$RUNNER_TEMP/exception-tests"
+      - name: Configure unsigned build
+        run: |
+          cat > Sources/WireGuardApp/Config/Developer.xcconfig <<'EOF'
+          DEVELOPMENT_TEAM =
+          APP_ID_IOS = com.example.wireguard
+          APP_ID_MACOS = com.example.wireguard
+          EOF
+      - name: Build macOS application
+        run: xcodebuild -project WireGuard.xcodeproj -target WireGuardmacOS -configuration Debug -sdk macosx ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO build
+      - name: Build iOS application
+        run: xcodebuild -project WireGuard.xcodeproj -target WireGuardiOS -configuration Debug -sdk iphoneos ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build

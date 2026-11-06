@@ -79,6 +79,7 @@
 "tunnelInterfacePublicKey" = "Public key";
 "tunnelInterfaceGenerateKeypair" = "Generate keypair";
 "tunnelInterfaceAddresses" = "Addresses";
+"tunnelInterfaceKillSwitchExceptions" = "Kill-switch exceptions";
 "tunnelInterfaceListenPort" = "Listen port";
 "tunnelInterfaceMTU" = "MTU";
 "tunnelInterfaceDNS" = "DNS servers";
@@ -174,6 +175,8 @@
 "alertInvalidInterfaceMessagePrivateKeyRequired" = "Interface’s private key is required";
 "alertInvalidInterfaceMessagePrivateKeyInvalid" = "Interface’s private key must be a 32-byte key in base64 encoding";
 "alertInvalidInterfaceMessageAddressInvalid" = "Interface addresses must be a list of comma-separated IP addresses, optionally in CIDR notation";
+"alertInvalidInterfaceMessageKillSwitchExceptionsInvalid" = "Kill-switch exceptions must be a list of comma-separated IP addresses or networks in CIDR notation";
+"alertTunnelActivationKillSwitchExceptionsFailureMessage" = "Kill-switch exceptions cannot be used when the VPN forces all networks or enforces routes.";
 "alertInvalidInterfaceMessageListenPortInvalid" = "Interface’s listen port must be between 0 and 65535, or unspecified";
 "alertInvalidInterfaceMessageMTUInvalid" = "Interface’s MTU must be between 576 and 65535, or unspecified";
 "alertInvalidInterfaceMessageDNSInvalid" = "Interface’s DNS servers must be a list of comma-separated IP addresses";
@@ -389,7 +392,7 @@
 "macAlertMTUInvalid (%@)" = "MTU ‘%@’ is invalid.";
 
 "macAlertUnrecognizedInterfaceKey (%@)" = "Interface contains unrecognized key ‘%@’";
-"macAlertInfoUnrecognizedInterfaceKey" = "Valid keys are: ‘PrivateKey’, ‘ListenPort’, ‘Address’, ‘DNS’ and ‘MTU’.";
+"macAlertInfoUnrecognizedInterfaceKey" = "Valid keys are: ‘PrivateKey’, ‘ListenPort’, ‘Address’, ‘DNS’, ‘MTU’, and ‘KillSwitchExceptions’.";
 
 "macAlertPublicKeyInvalid" = "Public key is invalid";
 "macAlertPreSharedKeyInvalid" = "Preshared key is invalid";

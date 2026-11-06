@@ -38,6 +38,26 @@ extension IPAddressRange {
         networkPrefixLength = parsed.1
     }
 
+    public init?(killSwitchException string: String) {
+        guard let range = IPAddressRange(from: string) else { return nil }
+        if let slash = string.lastIndex(of: "/") {
+            guard let length = UInt8(string[string.index(after: slash)...]),
+                  length <= (range.address is IPv4Address ? 32 : 128) else { return nil }
+        }
+        self = range
+    }
+
+    public static func parseKillSwitchExceptions(_ string: String) -> [IPAddressRange]? {
+        var ranges = [IPAddressRange]()
+        for value in string.split(separator: ",", omittingEmptySubsequences: false) {
+            guard let range = IPAddressRange(killSwitchException: value.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+                return nil
+            }
+            ranges.append(range)
+        }
+        return ranges
+    }
+
     private static func parseAddressString(_ string: String) -> (IPAddress, UInt8)? {
         let endOfIPAddress = string.lastIndex(of: "/") ?? string.endIndex
         let addressString = String(string[string.startIndex ..< endOfIPAddress])

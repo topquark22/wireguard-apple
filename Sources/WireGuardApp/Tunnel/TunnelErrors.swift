@@ -77,6 +77,8 @@ extension PacketTunnelProviderError: WireGuardAppError {
             return (tr("alertTunnelActivationFailureTitle"), tr("alertTunnelActivationFileDescriptorFailureMessage"))
         case .couldNotSetNetworkSettings:
             return (tr("alertTunnelActivationFailureTitle"), tr("alertTunnelActivationSetNetworkSettingsMessage"))
+        case .incompatibleKillSwitchExceptions:
+            return (tr("alertTunnelActivationFailureTitle"), tr("alertTunnelActivationKillSwitchExceptionsFailureMessage"))
         }
     }
 }
