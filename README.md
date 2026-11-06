@@ -4,6 +4,9 @@ This project contains an application for iOS and for macOS, as well as many comp
 
 ## Excluding networks from the tunnel
 
+> **Provisional and untested on Apple devices.** This is development work;
+> successful builds and tests do not verify device routing behavior.
+
 The optional `KillSwitchExceptions` field in the `[Interface]` section is a
 comma-separated list of IP addresses or CIDR networks. For example:
 
